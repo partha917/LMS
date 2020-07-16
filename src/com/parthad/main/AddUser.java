@@ -154,14 +154,14 @@ public class AddUser {
 		login.closeConnection(con);
 	}
 
-	public static void addStudent() throws ClassNotFoundException, SQLException {
+	public static boolean addStudent() throws ClassNotFoundException, SQLException {
 
 		con = login.establishConnection();
 		try {
 			st = con.createStatement();
 
 			String sql = "INSERT INTO lmsdb.student " + "VALUES ('" + getId_stu() + "', '" + getFirstname() + "', '"
-					+ getLastname() + "','" + getUsername() + "', '" + getDept() + "', '" + getContactNo() + "','"
+					+ getLastname() + "','" + getUsername_stu() + "', '" + getDept() + "', '" + getContactNo() + "','"
 					+ getEmail() + "')";
 			st.executeUpdate(sql);
 
@@ -172,9 +172,12 @@ public class AddUser {
 			System.out.println("Student added successfully.");
 		} catch (SQLException e) {
 			System.out.println("Could not added." + e.getErrorCode() + e.getMessage());
+			login.closeConnection(con);
+			return false;
 		}
 
 		login.closeConnection(con);
+		return true;
 
 	}
 
@@ -212,6 +215,10 @@ public class AddUser {
 
 	public static void setStudentUsername(String username) {
 		setUsername_stu(username);
+	}
+	public static void setId_Student() throws ClassNotFoundException, SQLException {
+		int id=getLoggedInStudentID();
+		AddUser.setId_stu(id);
 	}
 
 }

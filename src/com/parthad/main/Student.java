@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.parthad.gui.DisplayFrameGUI;
+
 public class Student {
 
 	private static Connection con;
@@ -71,7 +73,7 @@ public class Student {
 
 	}
 
-	public static void issuedBooksStudent() throws ClassNotFoundException, SQLException {
+	public static boolean issuedBooksStudent() throws ClassNotFoundException, SQLException {
 		con = login.establishConnection();
 		st = con.createStatement();
 		String sql = "SELECT b.id_book,b.book_name,b.author,b.category, i.issue_date,i.return_date, i.status from lmsdb.books b , lmsdb.issue_book i where b.id_book=i.id_book and i.id_stu="
@@ -85,6 +87,9 @@ public class Student {
 				String[] toPrint = { "Book ID", "Book Name", "Author", "Category", "Issue Date", "Return Date",
 						"Satus" };
 				FormatOP.printHeader(toPrint, 20);
+				
+				DisplayFrameGUI.setColumnNames(toPrint);
+				
 				count++;
 			}
 			int bookID = rs.getInt(1);
@@ -97,26 +102,45 @@ public class Student {
 
 			Object[] data = { bookID, bookName, author, category, issueDate, returnDate, status };
 			FormatOP.printData(data, 20);
+			
+			DisplayFrameGUI.createTableData(data);
+			
 			System.out.println();
 
 		}
 		if (!check) {
 			System.out.println("\n\nNo results found");
+			login.closeConnection(con);
+			return false;
+			
 		}
 
 		login.closeConnection(con);
 		System.out.println("\n\n\n");
+		return true;
 	}
 
 	public static void viewStudentInfo(boolean all) throws ClassNotFoundException, SQLException {
+		
+		//true--> all student info
+		//false--> only view the updated student info
+		
+		
 		con = login.establishConnection();
 		st = con.createStatement();
 		String sql;
 		if (all) {
 			sql = "SELECT id_stu,concat(firstname_stu,' ',lastname_stu )as StudentName, username,dept,contact_no,email FROM lmsdb.student";
 		} else {
+		//	sql = "SELECT id_stu,concat(firstname_stu,' ',lastname_stu )as StudentName, username,dept,contact_no,email FROM lmsdb.student where id_stu="
+		//			+ AddUser.getLoggedInStudentID();
+		
+			
+			//Just for GUI purpose
 			sql = "SELECT id_stu,concat(firstname_stu,' ',lastname_stu )as StudentName, username,dept,contact_no,email FROM lmsdb.student where id_stu="
-					+ AddUser.getLoggedInStudentID();
+					+ AddUser.getId_stu();
+			System.out.println(sql);
+		
 		}
 		ResultSet rs = st.executeQuery(sql);
 
@@ -127,6 +151,9 @@ public class Student {
 			if (count == 0) {
 				String[] toPrint = { "Student ID", "Student Name", "Username", "Dept.", "Contact No", "Email" };
 				FormatOP.printHeader(toPrint, 20);
+				//
+				DisplayFrameGUI.setColumnNames(toPrint);
+				
 				count++;
 			}
 			int studentID = rs.getInt(1);
@@ -138,6 +165,9 @@ public class Student {
 
 			Object[] data = { studentID, studentName, username, Dept, contactNo, email };
 			FormatOP.printData(data, 20);
+			//
+			DisplayFrameGUI.createTableData(data);
+			
 			System.out.println();
 
 		}
@@ -149,23 +179,44 @@ public class Student {
 		System.out.println("\n\n\n");
 	}
 
-	public static void updateStudenInfo() throws ClassNotFoundException, SQLException {
+	public static boolean updateStudenInfo(boolean all) throws ClassNotFoundException, SQLException {
 
+		//true-->edit the current student info
+		
+		//false-->edit any students info  by librarian
+		
+		
 		con = login.establishConnection();
 		try {
 			st = con.createStatement();
-			String sql = "UPDATE lmsdb.student SET  firstname_stu = '" + AddUser.getFirstname() + "', lastname_stu = '"
-					+ AddUser.getLastname() + "', username = '" + AddUser.getUsername() + "', dept = '"
-					+ AddUser.getDept() + "', contact_no = '" + AddUser.getContactNo() + "', email= '"
-					+ AddUser.getEmail() + "' WHERE id_stu = " + AddUser.getLoggedInStudentID();
+			String sql="";
+			if(all) {
+				sql = "UPDATE lmsdb.student SET  firstname_stu = '" + AddUser.getFirstname() + "', lastname_stu = '"
+						+ AddUser.getLastname() + "', username = '" + AddUser.getUsername() + "', dept = '"
+						+ AddUser.getDept() + "', contact_no = '" + AddUser.getContactNo() + "', email= '"
+						+ AddUser.getEmail() + "' WHERE id_stu = " + AddUser.getLoggedInStudentID();
+					
+			}else {
+				sql = "UPDATE lmsdb.student SET  firstname_stu = '" + AddUser.getFirstname() + "', lastname_stu = '"
+						+ AddUser.getLastname() + "', username = '" + AddUser.getUsername_stu() + "', dept = '"
+						+ AddUser.getDept() + "', contact_no = '" + AddUser.getContactNo() + "', email= '"
+						+ AddUser.getEmail() + "' WHERE id_stu = " + AddUser.getId_stu();
+				
+			}
+			System.out.println(sql);
+			
 			st.executeUpdate(sql);
+			System.out.println(sql);
 			System.out.println("Student Record updated successfully.\n");
 		} catch (SQLException e) {
 			System.out.println("Could not added.\n" + e.getErrorCode() + e.getMessage());
+			login.closeConnection(con);
+			return false;
 		}
 
 		login.closeConnection(con);
 		System.out.println("\n\n\n");
+		return true;
 	}
 
 }

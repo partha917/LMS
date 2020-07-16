@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.parthad.gui.DisplayFrameGUI;
+
 public class Book {
 
 	protected static int id_book = 0;
@@ -109,6 +111,9 @@ public class Book {
 		String[] toPrint = { "Book ID", "Book Name", "Author", "Category", "Shelf", "Price", "No. of Books" };
 		FormatOP.printHeader(toPrint, 20);
 
+		// Create the table in GUI
+		DisplayFrameGUI.setColumnNames(toPrint);
+
 		while (rs.next()) {
 			int bookID = rs.getInt(1);
 			String bookName = rs.getString(2);
@@ -120,6 +125,11 @@ public class Book {
 
 			Object[] data = { bookID, bookName, author, category, shelf, price, qty };
 			FormatOP.printData(data, 20);
+
+			// send the data[] to to create the table data directly
+
+			DisplayFrameGUI.createTableData(data);
+			//
 			System.out.println();
 
 		}
@@ -128,7 +138,7 @@ public class Book {
 		System.out.println("\n\n\n");
 	}
 
-	public static int bookDetailsByID() throws ClassNotFoundException, SQLException {
+	public static boolean bookDetailsByID() throws ClassNotFoundException, SQLException {
 		con = login.establishConnection();
 		st = con.createStatement();
 		String sql = "SELECT b.*, q.qty from lmsdb.books b inner join lmsdb.books_qty q on b.id_book=q.id_book and b.id_book="
@@ -137,6 +147,9 @@ public class Book {
 
 		String[] toPrint = { "Book ID", "Book Name", "Author", "Category", "Shelf", "Price", "No. of Books" };
 		FormatOP.printHeader(toPrint, 20);
+		
+		DisplayFrameGUI.setColumnNames(toPrint);
+		
 		int bookID = 0;
 		if (rs.next()) {
 			bookID = rs.getInt(1);
@@ -149,12 +162,20 @@ public class Book {
 
 			Object[] data = { bookID, bookName, author, category, shelf, price, qty };
 			FormatOP.printData(data, 20);
+			
+			DisplayFrameGUI.createTableData(data);
+			
 			System.out.println();
 		}
-		return bookID;
+		else {
+			login.closeConnection(con);
+			return false;
+		}
+		login.closeConnection(con);
+		return true;
 	}
 
-	public static void searchBook(String bookname) throws ClassNotFoundException, SQLException {
+	public static boolean searchBook(String bookname) throws ClassNotFoundException, SQLException {
 		con = login.establishConnection();
 		st = con.createStatement();
 		String sql = "SELECT b.*, q.qty from lmsdb.books b inner join lmsdb.books_qty q on b.id_book=q.id_book and b.book_name like '%"
@@ -167,6 +188,8 @@ public class Book {
 			if (count == 0) {
 				String[] toPrint = { "Book ID", "Book Name", "Author", "Category", "Shelf", "Price", "No. of Books" };
 				FormatOP.printHeader(toPrint, 20);
+				//
+				DisplayFrameGUI.setColumnNames(toPrint);
 
 				count++;
 			}
@@ -180,16 +203,22 @@ public class Book {
 
 			Object[] data = { bookID, bookName, author, category, shelf, price, qty };
 			FormatOP.printData(data, 20);
+			DisplayFrameGUI.createTableData(data);
+
 			System.out.println();
 
 		}
 
 		if (!check) {
+			login.closeConnection(con);
 			System.out.println("\n\nNo results found");
+			return false;
 		}
 
 		login.closeConnection(con);
 		System.out.println("\n\n\n");
+		System.out.println("Returning true");
+		return true;
 
 	}
 
@@ -207,6 +236,9 @@ public class Book {
 						"Issue Date", "Return Date", "Satus" };
 				FormatOP.printHeader(toPrint, 20);
 
+				//
+				DisplayFrameGUI.setColumnNames(toPrint);
+
 				count++;
 			}
 			int bookID = rs.getInt(1);
@@ -220,6 +252,9 @@ public class Book {
 			String status = rs.getString(9);
 			Object[] data = { bookID, bookName, studentID, studentName, libID, libName, issueDate, returnDate, status };
 			FormatOP.printData(data, 20);
+			//
+			DisplayFrameGUI.createTableData(data);
+
 			System.out.println();
 		}
 		System.out.println();
@@ -231,7 +266,7 @@ public class Book {
 		System.out.println("\n\n\n");
 	}
 
-	public static void addBook() throws SQLException, ClassNotFoundException {
+	public static boolean addBook() throws SQLException, ClassNotFoundException {
 		con = login.establishConnection();
 		try {
 			st = con.createStatement();
@@ -247,9 +282,13 @@ public class Book {
 			System.out.println("Books added successfully.\n");
 		} catch (SQLException e) {
 			System.out.println("Could not added.\n" + e.getErrorCode() + e.getMessage());
+			login.closeConnection(con);
+			return false;
 		}
 
 		login.closeConnection(con);
+		System.out.println("Returning true");
+		return true;
 	}
 
 	public static int checkAvailablity() throws ClassNotFoundException, SQLException {
@@ -266,24 +305,42 @@ public class Book {
 		return 0;
 	}
 
-	public static void updateBookDetails(int oldBookID) throws ClassNotFoundException, SQLException {
+	public static boolean updateBookDetails() throws ClassNotFoundException, SQLException {
 		con = login.establishConnection();
 
 		try {
 
 			st = con.createStatement();
-			String sql = "UPDATE lmsdb.books SET id_book = " + Book.getIdBook() + ", book_name = '" + Book.getBookName()
-					+ "', author = '" + Book.getAuthor() + "', category = '" + Book.getCategory() + "', shelf = '"
-					+ Book.getShelf() + "', price = " + Book.getPrice() + " WHERE id_book = " + oldBookID;
+			// String sql = "UPDATE lmsdb.books SET id_book = " + Book.getIdBook() + ",
+			// book_name = '" + Book.getBookName()
+			// + "', author = '" + Book.getAuthor() + "', category = '" + Book.getCategory()
+			// + "', shelf = '"
+			// + Book.getShelf() + "', price = " + Book.getPrice() + " WHERE id_book = " +
+			// oldBookID;
+
+			// For GUi
+
+			String sql = "UPDATE lmsdb.books SET  book_name = '" + Book.getBookName() + "', author = '"
+					+ Book.getAuthor() + "', category = '" + Book.getCategory() + "', shelf = '" + Book.getShelf()
+					+ "', price = " + Book.getPrice() + " WHERE id_book = " + Book.getIdBook();
+
+			// String sql=UPDATE `lmsdb`.`books` SET `book_name` = 'ABCD 6', `author` =
+			// 'Parthaa', `category` = 'Adventures', `shelf` = 'Q8', `price` = '2500' WHERE
+			// (`id_book` = '102');
+
 			st.executeUpdate(sql);
 			sql = "UPDATE lmsdb.books_qty SET qty = " + Book.getQty() + " WHERE id_book = " + Book.getIdBook();
 			st.executeUpdate(sql);
 			System.out.println("Books added successfully.\n");
 		} catch (SQLException e) {
 			System.out.println("Could not added.\n" + e.getErrorCode() + e.getMessage());
+			login.closeConnection(con);
+			return false;
 		}
 
 		login.closeConnection(con);
+
+		return true;
 	}
 
 }

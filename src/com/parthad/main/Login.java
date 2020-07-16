@@ -85,6 +85,7 @@ public class Login {
 		String sql = "SELECT username,pwd FROM lmsdb.pwd_stu where username = '" + username + "' AND pwd = '" + password
 				+ "'";
 		AddUser.setStudentUsername(username);
+		AddUser.setId_Student();
 		ResultSet rs = st.executeQuery(sql);
 		if (rs.next()) {
 			System.out.println("\nSuccessfully logged in as studnet.");
@@ -105,5 +106,6 @@ public class Login {
 			// System.out.println("Connection Closed");
 		}
 	}
-
+	
+	
 }

@@ -19,7 +19,7 @@ public class UserInput {
 			System.out.print("Enter Student id: ");
 			s = sc.nextLine().toUpperCase();
 		} while (!CheckInput.checkNo(s));
-		Book.setId_stu(Integer.parseInt(s));
+		AddUser.setId_stu(Integer.parseInt(s));
 
 		do {
 			System.out.print("Enter return date: ");
@@ -55,9 +55,9 @@ public class UserInput {
 		} while (!CheckInput.checkNo(s));
 		Book.setIdBook(Integer.parseInt(s));
 
-		int oldBookID = Book.bookDetailsByID();
+		Book.bookDetailsByID();
 		UserInput.inputBook();
-		Book.updateBookDetails(oldBookID);
+		Book.updateBookDetails();
 	}
 
 	public static void updateStudentInfoInput(String user) throws ClassNotFoundException, SQLException {
@@ -69,7 +69,7 @@ public class UserInput {
 			AddUser.setId_stu(Integer.parseInt(s));
 		}
 		UserInput.inputStudent();
-		Student.updateStudenInfo();
+		Student.updateStudenInfo(false);
 	}
 
 	public static void updateLibrarianInfoInput(String user) throws ClassNotFoundException, SQLException {
@@ -140,7 +140,7 @@ public class UserInput {
 
 		System.out.print("Enter username: ");
 		s = sc.nextLine().toUpperCase();
-		AddUser.setUsername(s);
+		AddUser.setStudentUsername(s);
 	}
 
 	public static void inputLibrarian() {
